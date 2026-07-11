@@ -1,6 +1,6 @@
 import { setUser } from './config.js';
 
-export type CommandHandler = (cmdName: string, ...args: string[]) => void;
+export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
 export type CommandsRegistry = {
     [cmdName: string]: CommandHandler;
@@ -10,7 +10,7 @@ export function registerCommand(registry: CommandsRegistry, cmdName: string, han
     registry[cmdName] = handler;
 }
 
-export function runCommand(registry: CommandsRegistry, cmdName: string, ...args: string[]): void {
+export async function runCommand(registry: CommandsRegistry, cmdName: string, ...args: string[]): Promise<void> {
     if(!registry[cmdName]) {
         throw new Error(`Command not found: ${cmdName}`);
     }
@@ -18,7 +18,7 @@ export function runCommand(registry: CommandsRegistry, cmdName: string, ...args:
     registry[cmdName](cmdName, ...args);
 }
 
-export function handlerLogin(cmdName: string, ...args: string[]): void {
+export async function handlerLogin(cmdName: string, ...args: string[]): Promise<void> {
   if(args.length < 1) {
     throw new Error(`Missing argument: username is expected`);
   }
