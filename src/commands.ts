@@ -1,5 +1,5 @@
 import { setUser } from './config.js';
-import { createUser, getUserByName } from './db/queries/users.js';
+import { createUser, getUserByName, deleteAllUsers } from './db/queries/users.js';
 import { DrizzleQueryError } from "drizzle-orm";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
@@ -61,5 +61,15 @@ export async function handlerRegister(cmdName: string, ...args: string[]): Promi
             }
         }
         throw err;
+    }
+}
+
+export async function handlerReset(cmdName: string, ...args: string[]): Promise<void> {
+    try {
+        setUser('');
+        await deleteAllUsers();
+        console.log(`All users have been deleted.`);
+    } catch (error: any) {
+        throw error;
     }
 }
