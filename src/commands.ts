@@ -1,5 +1,5 @@
-import { setUser } from './config.js';
-import { createUser, getUserByName, deleteAllUsers } from './db/queries/users.js';
+import { setUser, readConfig } from './config.js';
+import { createUser, getUserByName, deleteAllUsers, getUsers } from './db/queries/users.js';
 import { DrizzleQueryError } from "drizzle-orm";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
@@ -69,6 +69,20 @@ export async function handlerReset(cmdName: string, ...args: string[]): Promise<
         setUser('');
         await deleteAllUsers();
         console.log(`All users have been deleted.`);
+    } catch (error: any) {
+        throw error;
+    }
+}
+
+export async function handlerUsers(cmdName: string, ...args: string[]): Promise<void> {
+    try {
+        const config = readConfig();
+        const currentUser = config.currentUserName ?? null;
+
+        const users = await getUsers();
+        for(const user of users) {
+            console.log(`* ${user.name}` + (user.name === currentUser ? " (current)" : ""));
+        }
     } catch (error: any) {
         throw error;
     }
