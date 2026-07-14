@@ -1,4 +1,3 @@
-import { readConfig, setUser } from "./config.js";
 import { CommandsRegistry, registerCommand, runCommand, handlerLogin, handlerRegister, handlerReset } from "./commands.js";
 
 async function main() {
