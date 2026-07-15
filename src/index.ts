@@ -1,6 +1,6 @@
 import { 
     CommandsRegistry, registerCommand, runCommand, handlerLogin, 
-    handlerRegister, handlerReset, handlerUsers 
+    handlerRegister, handlerReset, handlerUsers , handlerAgg
 } from "./commands.js";
 
 async function main() {
@@ -9,7 +9,8 @@ async function main() {
     registerCommand(commandsRegistry, "register", handlerRegister);
     registerCommand(commandsRegistry, "reset", handlerReset);
     registerCommand(commandsRegistry, "users", handlerUsers);
-    
+    registerCommand(commandsRegistry, "agg", handlerAgg);
+
     const args = process.argv.slice(2);
     if(args.length < 1) {
         console.error("Missing command name");

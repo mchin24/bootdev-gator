@@ -1,6 +1,7 @@
 import { setUser, readConfig } from './config.js';
 import { createUser, getUserByName, deleteAllUsers, getUsers } from './db/queries/users.js';
 import { DrizzleQueryError } from "drizzle-orm";
+import { fetchFeed } from './rss.js';
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
@@ -83,6 +84,16 @@ export async function handlerUsers(cmdName: string, ...args: string[]): Promise<
         for(const user of users) {
             console.log(`* ${user.name}` + (user.name === currentUser ? " (current)" : ""));
         }
+    } catch (error: any) {
+        throw error;
+    }
+}
+
+export async function handlerAgg(cmdName: string, ...args: string[]): Promise<void> {
+    try {
+        const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
+        console.log(JSON.stringify(feed));
+
     } catch (error: any) {
         throw error;
     }
