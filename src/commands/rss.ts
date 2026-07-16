@@ -1,7 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
-import { UUID } from "node:crypto";
-import { Feed, User } from "./db/schema.js";
-import { createFeed, getFeeds } from "./db/queries/feeds.js";
+import { Feed, User } from "../db/schema.js";
+import { createFeed, getFeeds } from "../db/queries/feeds.js";
+import { readConfig } from "../config.js";
+import { getUserByName } from "../db/queries/users.js";
 
 type RSSFeed = {
   channel: {
@@ -18,6 +19,11 @@ type RSSItem = {
   description: string;
   pubDate: string;
 };
+
+export async function handlerAgg(cmdName: string, ...args: string[]): Promise<void> {
+    const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
+    console.log(JSON.stringify(feed));
+}
 
 export async function fetchFeed(feedURL: string): Promise<RSSFeed> {
     try {
@@ -77,12 +83,29 @@ export function printFeed(feed: Feed, user: User): void {
     console.log(`Feed: ${JSON.stringify(feed)}`);
 }
 
+export async function handlerAddFeed(cmdName: string, ...args: string[]): Promise<void> {
+    if(args.length < 1) throw new Error('Missing arguments: name and url are required.');
+    if(args.length < 2) throw new Error('Missing argument: url is required.');
+    const name: string = args[0];
+    const url: string = args[1];
+
+    const config = readConfig();
+    if(!config.currentUserName) {
+        throw new Error('A user must be logged in to create a feed.');
+    }
+    const user = await getUserByName(config.currentUserName);
+    if(!user) throw new Error(`User not found: ${config.currentUserName}`);
+
+    const feed = await addFeed(name, url, user.id);
+    printFeed(feed, user);
+}
+
 
 export async function handlerFeeds(cmdName: string, ...args: string[]): Promise<void> {
     try {
         const feeds = await getFeeds();
         for(const { name, url, username} of feeds) {
-            console.log(`Feed ${name}: ${url} - added by ${username}`);
+            console.log(`Feed ${name}: ${url} - added by ${username}`)
         }
     } catch (error: any) {
         throw new Error(`Failed to retrieve RSS Feeds: ${error.message}`);

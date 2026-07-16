@@ -1,10 +1,6 @@
-import { 
-    CommandsRegistry, registerCommand, runCommand, handlerLogin, 
-    handlerRegister, handlerReset, handlerUsers , handlerAgg,
-    handlerAddFeed
-} from "./commands.js";
-
-import { handlerFeeds } from "./rss.js";
+import { CommandsRegistry, registerCommand, runCommand } from "./commands/index.js";
+import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users.js";
+import { handlerAgg, handlerAddFeed, handlerFeeds } from "./commands/rss.js";
 
 async function main() {
     const commandsRegistry: CommandsRegistry = {};
