@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { Feed, User } from "../db/schema.js";
-import { createFeed, getFeeds } from "../db/queries/feeds.js";
+import { createFeed, createFeedFollows, getFeeds, getFeedByURL, getFeedFollowsForUser } from "../db/queries/feeds.js";
 import { readConfig } from "../config.js";
 import { getUserByName } from "../db/queries/users.js";
 
@@ -97,6 +97,7 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]): Promis
     if(!user) throw new Error(`User not found: ${config.currentUserName}`);
 
     const feed = await addFeed(name, url, user.id);
+    const follow = await createFeedFollows(user.id, feed.id);
     printFeed(feed, user);
 }
 
@@ -104,10 +105,58 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]): Promis
 export async function handlerFeeds(cmdName: string, ...args: string[]): Promise<void> {
     try {
         const feeds = await getFeeds();
-        for(const { name, url, username} of feeds) {
-            console.log(`Feed ${name}: ${url} - added by ${username}`)
+        for(const { name, url, user_name} of feeds) {
+            console.log(`Feed ${name}: ${url} - added by ${user_name}`)
         }
     } catch (error: any) {
         throw new Error(`Failed to retrieve RSS Feeds: ${error.message}`);
+    }
+}
+
+export async function handlerFollow(cmdName: string, ...args: string[]): Promise<void> {
+    if(args.length < 1) {
+        throw new Error('Missing argument: expected url');
+    }
+    const url: string = args[0];
+
+    const config = readConfig();
+    if(!config.currentUserName) {
+        throw new Error("A user must be logged in to perform this action.");
+    }
+
+    const user: User = await getUserByName(config.currentUserName);
+    if(!user) {
+        throw new Error(`User cannot be found for ${config.currentUserName}`);
+    }
+
+    const feed: Feed = await getFeedByURL(url);
+    if(!feed) {
+        throw new Error(`Feed cannot be found for ${url}`);
+    }
+
+    try {
+        const follow = await createFeedFollows(user.id, feed.id);
+        console.log(`${user.name} is now following ${feed.url}`);
+
+    } catch (error: any) {
+        throw new Error(`Failed creating follow of ${feed.url} for user ${user.name}.`);
+    }
+
+}
+
+export async function handlerFollowing(cmdName: string, ...args: string[]): Promise<void> {
+    const config = readConfig();
+    if(!config.currentUserName) {
+        throw new Error(`A user must be logged in to perform this action.`);
+    }
+
+    const user = await getUserByName(config.currentUserName);
+    if(!user) {
+        throw new Error(`User cannot be found for ${config.currentUserName}`);
+    }
+
+    const follows = await getFeedFollowsForUser(user.id);
+    for(const { feed_name } of follows) {
+        console.log(`${feed_name}`);
     }
 }

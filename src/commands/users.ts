@@ -4,14 +4,14 @@ import { DrizzleQueryError } from "drizzle-orm";
 
 export async function handlerLogin(cmdName: string, ...args: string[]): Promise<void> {
   if(args.length < 1) {
-    throw new Error(`Missing argument: username is expected`);
+    throw new Error(`Missing argument: user_name is expected`);
   }
 
-  const username = args[0]; 
+  const user_name = args[0]; 
 
-  const user = await getUserByName(username);
+  const user = await getUserByName(user_name);
     if(!user) {
-      throw new Error(`User not found: ${username}`);
+      throw new Error(`User not found: ${user_name}`);
     }
     setUser(user.name);
     console.log(`User has been set to: ${user.name}`);
@@ -19,14 +19,14 @@ export async function handlerLogin(cmdName: string, ...args: string[]): Promise<
 
 export async function handlerRegister(cmdName: string, ...args: string[]): Promise<void> {
     if(args.length < 1) {
-        throw new Error(`Missing argument: username is expected`);
+        throw new Error(`Missing argument: user name is expected`);
     }
 
     try {
-        const username = args[0];
-        const user = await createUser(username);
-        setUser(username);
-        console.log(`${username} has been registered.`);
+        const user_name = args[0];
+        const user = await createUser(user_name);
+        setUser(user_name);
+        console.log(`${user_name} has been registered.`);
         console.log(`User details: ${JSON.stringify(user)}`);
     } catch (err: any) {
         if(err instanceof DrizzleQueryError) {
