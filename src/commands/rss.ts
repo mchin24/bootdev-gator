@@ -21,7 +21,11 @@ type RSSItem = {
 };
 
 export async function handlerAgg(cmdName: string, ...args: string[]): Promise<void> {
-    const feed = await fetchFeed("https://www.wagslane.dev/index.xml");
+    if(args.length < 1) {
+        throw new Error(`Missing argument: url is required.`);
+    }
+    const url = args[0];
+    const feed = await fetchFeed(url);
     console.log(JSON.stringify(feed));
 }
 
