@@ -1,4 +1,4 @@
-import { CommandsRegistry, registerCommand, runCommand } from "./commands/index.js";
+import { CommandsRegistry, registerCommand, runCommand, loggedInUser } from "./commands/index.js";
 import { handlerLogin, handlerRegister, handlerReset, handlerUsers } from "./commands/users.js";
 import { handlerAgg, handlerAddFeed, handlerFeeds, handlerFollow, handlerFollowing 
     } from "./commands/rss.js";
@@ -10,10 +10,10 @@ async function main() {
     registerCommand(commandsRegistry, "reset", handlerReset);
     registerCommand(commandsRegistry, "users", handlerUsers);
     registerCommand(commandsRegistry, "agg", handlerAgg);
-    registerCommand(commandsRegistry, "addfeed", handlerAddFeed);
+    registerCommand(commandsRegistry, "addfeed", loggedInUser(handlerAddFeed));
     registerCommand(commandsRegistry, "feeds", handlerFeeds);
-    registerCommand(commandsRegistry, "follow", handlerFollow);
-    registerCommand(commandsRegistry, "following", handlerFollowing);
+    registerCommand(commandsRegistry, "follow", loggedInUser(handlerFollow));
+    registerCommand(commandsRegistry, "following", loggedInUser(handlerFollowing));
 
     const args = process.argv.slice(2);
     if(args.length < 1) {

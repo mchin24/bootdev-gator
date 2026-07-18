@@ -87,18 +87,11 @@ export function printFeed(feed: Feed, user: User): void {
     console.log(`Feed: ${JSON.stringify(feed)}`);
 }
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]): Promise<void> {
+export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]): Promise<void> {
     if(args.length < 1) throw new Error('Missing arguments: name and url are required.');
     if(args.length < 2) throw new Error('Missing argument: url is required.');
     const name: string = args[0];
     const url: string = args[1];
-
-    const config = readConfig();
-    if(!config.currentUserName) {
-        throw new Error('A user must be logged in to create a feed.');
-    }
-    const user = await getUserByName(config.currentUserName);
-    if(!user) throw new Error(`User not found: ${config.currentUserName}`);
 
     const feed = await addFeed(name, url, user.id);
     const follow = await createFeedFollows(user.id, feed.id);
@@ -117,22 +110,11 @@ export async function handlerFeeds(cmdName: string, ...args: string[]): Promise<
     }
 }
 
-export async function handlerFollow(cmdName: string, ...args: string[]): Promise<void> {
+export async function handlerFollow(cmdName: string, user: User, ...args: string[]): Promise<void> {
     if(args.length < 1) {
         throw new Error('Missing argument: expected url');
     }
     const url: string = args[0];
-
-    const config = readConfig();
-    if(!config.currentUserName) {
-        throw new Error("A user must be logged in to perform this action.");
-    }
-
-    const user: User = await getUserByName(config.currentUserName);
-    if(!user) {
-        throw new Error(`User cannot be found for ${config.currentUserName}`);
-    }
-
     const feed: Feed = await getFeedByURL(url);
     if(!feed) {
         throw new Error(`Feed cannot be found for ${url}`);
@@ -148,17 +130,7 @@ export async function handlerFollow(cmdName: string, ...args: string[]): Promise
 
 }
 
-export async function handlerFollowing(cmdName: string, ...args: string[]): Promise<void> {
-    const config = readConfig();
-    if(!config.currentUserName) {
-        throw new Error(`A user must be logged in to perform this action.`);
-    }
-
-    const user = await getUserByName(config.currentUserName);
-    if(!user) {
-        throw new Error(`User cannot be found for ${config.currentUserName}`);
-    }
-
+export async function handlerFollowing(cmdName: string, user: User, ...args: string[]): Promise<void> {
     const follows = await getFeedFollowsForUser(user.id);
     for(const { feed_name } of follows) {
         console.log(`${feed_name}`);
